@@ -1,0 +1,94 @@
+import time
+import sys
+import threading
+
+class Timer:
+    def __init__(self):
+        self.start_time = None
+        self.stopwatch_running = False
+        self.elapsed_time = 0
+        self.thread = None
+
+    def start_countdown(self, duration):
+        print(f"Countdown started for {duration} seconds...")
+        while duration > 0:
+            sys.stdout.write(f"\rRemaining: {duration} seconds")
+            sys.stdout.flush()
+            time.sleep(1)
+            duration -= 1
+        print("\nCountdown complete!")
+
+    def start_stopwatch(self):
+        if not self.stopwatch_running:
+            self.start_time = time.perf_counter()
+            self.stopwatch_running = True
+            self.thread = threading.Thread(target=self._run_stopwatch)
+            self.thread.start()
+            print("Stopwatch started.")
+        else:
+            print("Stopwatch is already running.")
+
+    def _run_stopwatch(self):
+        while self.stopwatch_running:
+            self.elapsed_time = time.perf_counter() - self.start_time
+            sys.stdout.write(f"\rElapsed time: {int(self.elapsed_time)} seconds")
+            sys.stdout.flush()
+            time.sleep(1)
+
+    def stop_stopwatch(self):
+        if self.stopwatch_running:
+            self.stopwatch_running = False
+            if self.thread:
+                self.thread.join()
+            print(f"\nElapsed time: {int(self.elapsed_time)} seconds")
+        else:
+            print("Stopwatch is not running.")
+
+    def reset_stopwatch(self):
+        self.stop_stopwatch()
+        self.start_time = None
+        self.elapsed_time = 0
+        print("Stopwatch reset.")
+
+def main_menu():
+    timer = Timer()
+    while True:
+        print("\nChoose an option:")
+        print("1. Countdown Timer")
+        print("2. Stopwatch")
+        print("3. Exit")
+        choice = input("Enter your choice (1/2/3): ")
+
+        if choice == "1":
+            try:
+                countdown_duration = int(input("Enter countdown duration (in seconds): "))
+                timer.start_countdown(countdown_duration)
+            except ValueError:
+                print("Invalid input. Please enter a positive integer.")
+        elif choice == "2":
+            while True:
+                print("\nStopwatch options:")
+                print("1. Start")
+                print("2. Stop")
+                print("3. Reset")
+                print("4. Back to main menu")
+                stopwatch_choice = input("Enter your choice (1/2/3/4): ")
+
+                if stopwatch_choice == "1":
+                    timer.start_stopwatch()
+                elif stopwatch_choice == "2":
+                    timer.stop_stopwatch()
+                elif stopwatch_choice == "3":
+                    timer.reset_stopwatch()
+                elif stopwatch_choice == "4":
+                    break
+                else:
+                    print("Invalid choice. Try again.")
+        elif choice == "3":
+            print("Exiting the program. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Try again.")
+
+if __name__ == "__main__":
+    main_menu()
